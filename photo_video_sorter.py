@@ -24,7 +24,7 @@ class PhotoSorterApp:
         # self.root.geometry("750x650") 
 
         self.source_dir_var = tk.StringVar()
-        self.dest_dir_var = tk.StringVar()
+        self.dest_dir_var = tk.StringVar() # Correct variable for destination directory path
         self.move_files_var = tk.BooleanVar(value=True) 
         self.overwrite_var = tk.BooleanVar(value=False)
         self.presets = {}
@@ -47,14 +47,14 @@ class PhotoSorterApp:
 
         # --- Destination Folder ---
         ttk.Label(main_frame, text="Destination Folder:").grid(row=1, column=0, sticky=tk.W, padx=5, pady=(0,5))
-        dest_entry = ttk.Entry(main_frame, textvariable=self.dest_dir_var, width=60)
+        dest_entry = ttk.Entry(main_frame, textvariable=self.dest_dir_var, width=60) # Uses self.dest_dir_var
         dest_entry.grid(row=1, column=1, sticky=(tk.W, tk.E), padx=(0,5), pady=(0,5))
         ttk.Button(main_frame, text="Browse...", command=self.browse_dest_folder).grid(row=1, column=2, sticky=tk.W, padx=5, pady=(0,5))
 
         # --- Presets ---
         preset_frame = ttk.LabelFrame(main_frame, text="Presets", padding="10")
         preset_frame.grid(row=2, column=0, columnspan=3, sticky=(tk.W, tk.E), padx=5, pady=5)
-        preset_frame.columnconfigure(1, weight=1) # Allow combobox to expand
+        preset_frame.columnconfigure(1, weight=1) 
 
         ttk.Label(preset_frame, text="Select Preset:").grid(row=0, column=0, sticky=tk.W, padx=(0,5), pady=2)
         self.preset_combobox = ttk.Combobox(preset_frame, state="readonly", width=30)
@@ -80,8 +80,8 @@ class PhotoSorterApp:
         # --- Status Area ---
         status_frame = ttk.LabelFrame(main_frame, text="Log", padding="5")
         status_frame.grid(row=5, column=0, columnspan=3, sticky=(tk.W, tk.E, tk.N, tk.S), padx=5, pady=(0,5))
-        main_frame.rowconfigure(5, weight=1) # Allow status frame to expand vertically
-        status_frame.columnconfigure(0, weight=1) # Allow text widget to expand horizontally
+        main_frame.rowconfigure(5, weight=1) 
+        status_frame.columnconfigure(0, weight=1) 
 
         self.status_text = scrolledtext.ScrolledText(status_frame, wrap=tk.WORD, height=15, width=80, state=tk.DISABLED, relief=tk.SOLID, borderwidth=1)
         self.status_text.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S), padx=2, pady=2)
@@ -97,20 +97,15 @@ class PhotoSorterApp:
         self.root.update_idletasks()
 
     def browse_folder(self, entry_var):
-        folder_selected = filedialog.askdirectory(parent=self.root) # Parent dialogs
+        folder_selected = filedialog.askdirectory(parent=self.root) 
         if folder_selected:
             entry_var.set(folder_selected)
 
     def browse_source_folder(self):
         self.browse_folder(self.source_dir_var)
 
-    def browse_dest_folder(self):
-        self.browse_folder(self.dest_var) # Corrected from self.dest_dir_var - Wait, this should be self.dest_dir_var
-
-    # Corrected browse_dest_folder:
-    # def browse_dest_folder(self):
-    #     self.browse_folder(self.dest_dir_var)
-    # Oh, I see the original code was correct, my thought process found a non-existent error. Will use self.dest_dir_var
+    def browse_dest_folder(self): # This is the corrected method
+        self.browse_folder(self.dest_dir_var) # Ensures it uses self.dest_dir_var
 
     def get_preset_file_path(self):
         try:
@@ -150,7 +145,7 @@ class PhotoSorterApp:
                 self.preset_combobox.set(current_selection)
             else:
                 self.preset_combobox.current(0)
-            self.on_preset_selected(None) # Automatically load the selected/first preset
+            self.on_preset_selected(None) 
         else:
             self.preset_combobox.set('')
             self.source_dir_var.set("")
@@ -201,12 +196,12 @@ class PhotoSorterApp:
                 self.save_presets_to_file()
                 self.update_preset_combobox()
                 self.log_message(f"Preset '{selected_preset_name}' deleted.")
-                if not self.preset_combobox.get(): # If no preset is left selected
+                if not self.preset_combobox.get(): 
                     self.source_dir_var.set("")
                     self.dest_dir_var.set("")
             else:
                 messagebox.showerror("Delete Preset", "Selected preset not found. It might have been deleted externally.", parent=self.root)
-                self.load_presets() # Resync
+                self.load_presets() 
 
 
     def get_file_date(self, file_path):
@@ -217,8 +212,6 @@ class PhotoSorterApp:
             timestamp = os.path.getmtime(file_path)
         
         mtime = os.path.getmtime(file_path)
-        # Heuristic: if birthtime is very old/zero OR if mtime is significantly newer than birthtime
-        # and mtime is valid, prefer mtime. (st_birthtime might not be reliable on all systems/copies)
         if (timestamp < 100000000 or (mtime > timestamp and (mtime - timestamp > 3600))) and mtime > 0:
             timestamp = mtime
             
@@ -243,7 +236,6 @@ class PhotoSorterApp:
         
         abs_source_dir = os.path.abspath(source_dir)
         abs_dest_dir = os.path.abspath(dest_dir)
-        # Check if destination is INSIDE source
         if os.path.commonpath([abs_source_dir, abs_dest_dir]) == abs_source_dir and abs_source_dir != abs_dest_dir:
              if not messagebox.askyesno("Warning", "The destination folder appears to be inside the source folder. "
                                      "This could lead to files being reprocessed or unexpected behavior, "
@@ -270,10 +262,9 @@ class PhotoSorterApp:
 
         try:
             for root_folder, _, files in os.walk(source_dir, topdown=True):
-                # Avoid processing the destination folder if it's inside source_dir and we are walking into it
                 if os.path.abspath(root_folder).startswith(abs_dest_dir) and abs_dest_dir != abs_source_dir :
                     self.log_message(f"Skipping scan of destination subfolder: {root_folder}")
-                    continue # Don't process files from here
+                    continue 
 
                 for filename in files:
                     base, ext = os.path.splitext(filename)
@@ -295,7 +286,6 @@ class PhotoSorterApp:
                         target_file_path_original_name = os.path.join(target_month_dir, filename)
                         final_target_file_path = target_file_path_original_name
 
-                        # Skip if source and final destination are the exact same file path already
                         if os.path.abspath(source_file_path) == os.path.abspath(final_target_file_path):
                              self.log_message(f"Skipping '{filename}', source and target path are identical (already sorted).")
                              skipped_count +=1
@@ -304,29 +294,28 @@ class PhotoSorterApp:
                         if os.path.exists(final_target_file_path):
                             if overwrite:
                                 self.log_message(f"Overwriting '{filename}' in '{os.path.join(year, month)}' (Action: {action_gerund})")
-                            else: # Rename logic
+                            else: 
                                 counter = 1
                                 new_filename_base = f"{base} ({counter})"
                                 new_filename = f"{new_filename_base}{ext}"
                                 final_target_file_path = os.path.join(target_month_dir, new_filename)
                                 while os.path.exists(final_target_file_path):
-                                    # Safety: if renamed target path becomes identical to source path, skip operation for this file
                                     if os.path.abspath(source_file_path) == os.path.abspath(final_target_file_path):
                                         self.log_message(f"Skipping '{filename}', renamed target would be identical to source. Choose a different destination or clean up existing files.")
-                                        final_target_file_path = None # Mark to skip
+                                        final_target_file_path = None 
                                         break
                                     counter += 1
                                     new_filename_base = f"{base} ({counter})"
                                     new_filename = f"{new_filename_base}{ext}"
                                     final_target_file_path = os.path.join(target_month_dir, new_filename)
                                 
-                                if final_target_file_path: # If not marked to skip
+                                if final_target_file_path: 
                                     self.log_message(f"'{filename}' exists. Renaming to '{new_filename}' in '{os.path.join(year, month)}'")
-                                else: # Marked to skip by inner loop
+                                else: 
                                     skipped_count +=1
                                     continue
                         
-                        if final_target_file_path: # Ensure we have a valid target path
+                        if final_target_file_path: 
                             if move_files:
                                 shutil.move(source_file_path, final_target_file_path)
                             else:
@@ -338,10 +327,10 @@ class PhotoSorterApp:
                         self.log_message(f"Error processing '{filename}': {e}")
                         error_count += 1
                     
-                    if (processed_count + skipped_count + error_count) % 20 == 0: # Update UI a bit less frequently
+                    if (processed_count + skipped_count + error_count) % 20 == 0: 
                         self.root.update_idletasks()
         finally:
-            self.process_button.config(state=tk.NORMAL) # Re-enable the button
+            self.process_button.config(state=tk.NORMAL) 
             self.root.update_idletasks()
 
 
