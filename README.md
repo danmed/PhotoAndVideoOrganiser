@@ -38,7 +38,7 @@ This script provides an easy way to sort large collections of photos and videos.
 ## How to Use
 
 1.  **Download:**
-    * Clone this repository: `git clone https://github.com/your-username/your-repo-name.git`
+    * Clone this repository: `git clone https://github.com/danmed/PhotoAndVideoOrganiser.git`
     * Or, download the `photo_video_sorter.py` script directly.
 
 2.  **Run the Script:**
