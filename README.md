@@ -2,8 +2,8 @@
 
 A Python script with a graphical user interface (GUI) to organize your photos and videos from a source folder into year and month subfolders in a destination folder.
 
-![Screenshot Placeholder](https://via.placeholder.com/700x500.png?text=App+Screenshot+Here)
-*(Suggestion: Replace the placeholder above with an actual screenshot of the application)*
+![image](https://github.com/user-attachments/assets/cffbb06c-2340-486d-adfe-131a74fa8f80)
+
 
 ## Description
 
